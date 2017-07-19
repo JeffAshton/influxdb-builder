@@ -1,0 +1,23 @@
+{
+  "name": "influxdb-builder",
+  "version": "0.0.0",
+  "description": "Builds an influxdb from a yml definiton",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "influx",
+    "influxdb"
+  ],
+  "author": "Jeff Ashton",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "bunyan": "^1.8.10",
+    "js-yaml": "^3.9.0",
+    "lodash": "^4.17.4",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1"
+  }
+}
