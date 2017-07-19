@@ -1,0 +1,15 @@
+#!/usr/bin/env node
+
+'use strict';
+
+const argsParser = require( '../src/argsParser.js' );
+const app = require( '../src/app.js' );
+
+const args = argsParser( process.argv );
+if( !args ) {
+	process.exit( -1 );
+}
+
+app( args ).then( exitCode => {
+	process.exit( exitCode );
+} );

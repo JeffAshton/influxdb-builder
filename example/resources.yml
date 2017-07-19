@@ -1,0 +1,40 @@
+retention_policies:
+
+  '2hr':
+    duration: '2h'
+    replication: 2
+    shard_duration: '1h'
+    default: true
+
+  '1year':
+    duration: '365d'
+    replication: 1
+    shard_duration: '7d'
+
+continuous_queries:
+
+  'average_passengers':
+    query: >
+      SELECT mean(passengers) AS passengers
+      INTO ${database}."1year".average_passengers
+      FROM ${database}."2hr".bus_data
+      GROUP BY time(1d)
+    resample:
+      every: '30m'
+      for: '3d'
+
+  'max_passengers':
+    query: >
+      SELECT max(passengers) AS passengers
+      INTO ${database}."1year".max_passengers
+      FROM ${database}."2hr".bus_data
+      GROUP BY time(1d)
+    resample:
+      every: '30m'
+
+  'min_passengers':
+    query: >
+      SELECT min(passengers) AS passengers
+      INTO ${database}."1year".min_passengers
+      FROM ${database}."2hr".bus_data
+      GROUP BY time(1d)

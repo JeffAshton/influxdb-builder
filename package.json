@@ -1,0 +1,41 @@
+{
+  "name": "influxdb-builder",
+  "version": "0.0.0",
+  "description": "Builds an influxdb from a yml definiton",
+  "main": "src/app.js",
+  "bin": {
+    "influxdb-builder": "./bin/influxdb-builder"
+  },
+  "scripts": {
+    "ci": "npm run lint && npm run test",
+    "lint": "eslint .",
+    "test": "mocha"
+  },
+  "keywords": [
+    "influx",
+    "influxdb"
+  ],
+  "author": "Jeff Ashton",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "bunyan": "^1.8.10",
+    "es6-template": "^1.0.4",
+    "js-yaml": "^3.9.0",
+    "lodash": "^4.17.4",
+    "parse-duration": "^0.1.1",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1",
+    "sort-keys": "^2.0.0",
+    "tv4": "^1.3.0",
+    "tv4-formats": "^3.0.0",
+    "yanop": "^0.1.3"
+  },
+  "devDependencies": {
+    "chai": "^4.1.0",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^4.2.0",
+    "mocha": "^3.4.2",
+    "nock": "^9.0.14"
+  }
+}

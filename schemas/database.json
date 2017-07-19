@@ -1,0 +1,76 @@
+{
+	"type": "object",
+	"additionalProperties": false,
+	"minProperties": 1,
+	"properties": {
+		"continuous_queries": {
+			"type": "object",
+			"additionalProperties": false,
+			"minProperties": 1,
+			"patternProperties": {
+				"^\\w+$": {
+					"$ref": "#/definitions/continuous_query"
+				}
+			}
+		},
+		"retention_policies": {
+			"type": "object",
+			"additionalProperties": false,
+			"minProperties": 1,
+			"patternProperties": {
+				"^\\w+$": {
+					"$ref": "#/definitions/retention_policy"
+				}
+			}
+		}
+	},
+	"definitions": {
+		"continuous_query": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"query": {
+					"type": "string"
+				},
+				"resample": {
+					"type": "object",
+					"additionalProperties": false,
+					"minProperties": 1,
+					"properties": {
+						"every": {
+							"type": "string"
+						},
+						"for": {
+							"type": "string"
+						}
+					}
+				}
+			},
+			"required": [
+				"query"
+			]
+		},
+		"retention_policy": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"duration": {
+					"type": "string"
+				},
+				"replication": {
+					"type": "number"
+				},
+				"shard_duration": {
+					"type": "string"
+				},
+				"default": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"duration",
+				"replication"
+			]
+		}
+	}
+}
