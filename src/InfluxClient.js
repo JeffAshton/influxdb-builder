@@ -62,19 +62,35 @@ class InfluxClient {
 	showRetentionPolicies( databaseName ) {
 
 		const statement = `SHOW RETENTION POLICIES ON "${ databaseName }"`;
-		return this._get( statement );
+		return this
+			._get( statement )
+			.then( body => {
+
+				const result = body.results[ 0 ];
+				if( result.error ) {
+					throw new Error( result.error );
+				}
+
+				const series = result.series[ 0 ];
+				return expandSeries( series );
+			} );
 	}
 
 	showContinuousQueries( databaseName ) {
 
 		const statement = 'SHOW CONTINUOUS QUERIES';
-		return this._get( statement )
+		return this
+			._get( statement )
 			.then( body => {
+
 				const result = body.results[ 0 ];
+				if( result.error ) {
+					throw new Error( result.error );
+				}
 
 				const series = _.find( result.series, s => s.name === databaseName );
 				if( !series ) {
-					return [];
+					throw new Error( `database not found: ${ databaseName }` );
 				}
 
 				return expandSeries( series );
