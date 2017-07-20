@@ -43,7 +43,13 @@ class InfluxClient {
 					qs: { q: statement }
 				} )
 				.then( body => {
-					return body;
+
+					const result = body.results[ 0 ];
+					if( result.error ) {
+						throw new Error( result.error );
+					}
+
+					return result;
 				} );
 		};
 
@@ -54,7 +60,13 @@ class InfluxClient {
 					qs: { q: statement }
 				} )
 				.then( body => {
-					return body;
+
+					const result = body.results[ 0 ];
+					if( result.error ) {
+						throw new Error( result.error );
+					}
+
+					return result;
 				} );
 		};
 	}
@@ -64,12 +76,7 @@ class InfluxClient {
 		const statement = `SHOW RETENTION POLICIES ON "${ databaseName }"`;
 		return this
 			._get( statement )
-			.then( body => {
-
-				const result = body.results[ 0 ];
-				if( result.error ) {
-					throw new Error( result.error );
-				}
+			.then( result => {
 
 				const series = result.series[ 0 ];
 				return expandSeries( series );
@@ -81,12 +88,7 @@ class InfluxClient {
 		const statement = 'SHOW CONTINUOUS QUERIES';
 		return this
 			._get( statement )
-			.then( body => {
-
-				const result = body.results[ 0 ];
-				if( result.error ) {
-					throw new Error( result.error );
-				}
+			.then( result => {
 
 				const series = _.find( result.series, s => s.name === databaseName );
 				if( !series ) {
