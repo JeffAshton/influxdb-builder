@@ -31,3 +31,10 @@ continuous_queries:
       GROUP BY time(1d)
     resample:
       every: '30m'
+
+  'min_passengers':
+    query: >
+      SELECT min("passengers") AS "passengers"
+      INTO "1year"."min_passengers"
+      FROM "2hr"."bus_data"
+      GROUP BY time(1d)

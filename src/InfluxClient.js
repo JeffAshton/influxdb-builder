@@ -1,7 +1,22 @@
 'use strict';
 
+const _ = require( 'lodash' );
 const rp = require( 'request-promise' );
 const log = require( './log.js' );
+
+function expandSeries( series ) {
+
+	return _.map( series.values, valueArray => {
+
+		const item = {};
+
+		_.forEach( valueArray, ( value, index ) => {
+			item[ series.columns ] = value;
+		} );
+
+		return item;
+	} );
+}
 
 class InfluxClient {
 
@@ -43,14 +58,35 @@ class InfluxClient {
 		};
 	}
 
+	showRetentionPolicies( databaseName ) {
+		
+		const statement = `SHOW RETENTION POLICIES ON "${ databaseName }"`;
+		return this._get( statement );
+	}
+
+	showContinuousQueries( databaseName ) {
+		
+		const statement = 'SHOW CONTINUOUS QUERIES';
+		return this._get( statement )
+			.then( body => {
+				const statement = body.results[ 0 ];
+
+				return series = _.find( statement.series, series => series.name === databaseName );
+				if( !series ) {
+					return [];
+				}
+
+				return expandSeries( series );
+			} );
+	}
+	
 	createDatabaseAsync( databaseName ) {
 
 		const statement = `CREATE DATABASE "${ databaseName }"`;
-		
 		return this._post( statement );
 	}
-	
-	createRetentionPolicyAsync( databaseName, rententionPolicy ) {
+
+	formatCreateRetentionPolicy( databaseName, rententionPolicy ) {
 
 		let statement = `CREATE RETENTION POLICY "${ rententionPolicy.name }"` 
 			+ ` ON "${ databaseName }"`
@@ -66,10 +102,16 @@ class InfluxClient {
 			statement += ' DEFAULT';
 		}
 
-		return this._post( statement );
+		return statement;
 	}
 	
-	createContinuousQueryAsync( databaseName, continuousQuery ) {
+	createRetentionPolicyAsync( databaseName, rententionPolicy ) {
+
+		const statement = formatCreateRetentionPolicy( databaseName, rententionPolicy );
+		return this._post( statement );
+	}
+
+	formatCreateContinuousQuery( databaseName, continuousQuery ) {
 
 		let statement = `CREATE CONTINUOUS QUERY "${ continuousQuery.name }"` 
 			+ ` ON "${ databaseName }"`;
@@ -85,8 +127,15 @@ class InfluxClient {
 			}
 		}
 
-		statement += ` BEGIN ${ continuousQuery.query } END`;
+		const query = continuousQuery.query.replace( /\s+/g, ' ' );
+		statement += ` BEGIN ${ query } END`;
 
+		return statement;
+	}
+	
+	createContinuousQueryAsync( databaseName, continuousQuery ) {
+
+		const statement = formatCreateContinuousQuery( databaseName, continuousQuery );
 		return this._post( statement );
 	}
 }
