@@ -4,6 +4,24 @@ const _ = require( 'lodash' );
 const rp = require( 'request-promise' );
 const log = require( './log.js' );
 
+function getFirstResult( response ) {
+
+	if( response.error ) {
+		throw new Error( response.error );
+	}
+
+	if( !response.results ) {
+		throw new Error( 'query returned no results' );
+	}
+
+	const result = response.results[ 0 ];
+	if( result.error ) {
+		throw new Error( result.error );
+	}
+
+	return result;
+}
+
 function expandSeries( series ) {
 
 	return _.map( series.values, valueArray => {
@@ -42,14 +60,8 @@ class InfluxClient {
 				.get( {
 					qs: { q: statement }
 				} )
-				.then( body => {
-
-					const result = body.results[ 0 ];
-					if( result.error ) {
-						throw new Error( result.error );
-					}
-
-					return result;
+				.then( response => {
+					return getFirstResult( response );
 				} );
 		};
 
@@ -59,14 +71,8 @@ class InfluxClient {
 				.post( {
 					qs: { q: statement }
 				} )
-				.then( body => {
-
-					const result = body.results[ 0 ];
-					if( result.error ) {
-						throw new Error( result.error );
-					}
-
-					return result;
+				.then( response => {
+					return getFirstResult( response );
 				} );
 		};
 	}
