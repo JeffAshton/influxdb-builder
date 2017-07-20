@@ -11,7 +11,7 @@ function expandSeries( series ) {
 		const item = {};
 
 		_.forEach( valueArray, ( value, index ) => {
-			item[ series.columns ] = value;
+			item[ series.columns[ index ] ] = value;
 		} );
 
 		return item;
@@ -22,7 +22,7 @@ class InfluxClient {
 
 	constructor( url, username, password ) {
 
-		let auth = ( username && password )
+		const auth = ( username && password )
 			? {
 				user: username,
 				pass: password
@@ -38,19 +38,20 @@ class InfluxClient {
 
 		this._get = function( statement ) {
 			log.debug( { query: statement }, 'Executing GET query' );
-				return client.get( {
-					qs: { q: statement } 
+			return client
+				.get( {
+					qs: { q: statement }
 				} )
 				.then( body => {
 					return body;
 				} );
 		};
-		
+
 		this._post = function( statement ) {
 			log.debug( { query: statement }, 'Executing POST query' );
 			return client
 				.post( {
-					qs: { q: statement } 
+					qs: { q: statement }
 				} )
 				.then( body => {
 					return body;
@@ -59,19 +60,19 @@ class InfluxClient {
 	}
 
 	showRetentionPolicies( databaseName ) {
-		
+
 		const statement = `SHOW RETENTION POLICIES ON "${ databaseName }"`;
 		return this._get( statement );
 	}
 
 	showContinuousQueries( databaseName ) {
-		
+
 		const statement = 'SHOW CONTINUOUS QUERIES';
 		return this._get( statement )
 			.then( body => {
-				const statement = body.results[ 0 ];
+				const result = body.results[ 0 ];
 
-				return series = _.find( statement.series, series => series.name === databaseName );
+				const series = _.find( result.series, s => s.name === databaseName );
 				if( !series ) {
 					return [];
 				}
@@ -79,7 +80,7 @@ class InfluxClient {
 				return expandSeries( series );
 			} );
 	}
-	
+
 	createDatabaseAsync( databaseName ) {
 
 		const statement = `CREATE DATABASE "${ databaseName }"`;
@@ -88,14 +89,14 @@ class InfluxClient {
 
 	formatCreateRetentionPolicy( databaseName, rententionPolicy ) {
 
-		let statement = `CREATE RETENTION POLICY "${ rententionPolicy.name }"` 
+		let statement = `CREATE RETENTION POLICY "${ rententionPolicy.name }"`
 			+ ` ON "${ databaseName }"`
 			+ ` DURATION ${ rententionPolicy.duration }`
 			+ ` REPLICATION ${ rententionPolicy.replication }`;
 
-		const shardDuration = rententionPolicy[ 'shard_duration' ];
+		const shardDuration = rententionPolicy.shard_duration;
 		if( shardDuration ) {
-			statement += ` SHARD DURATION ${ shardDuration }`
+			statement += ` SHARD DURATION ${ shardDuration }`;
 		}
 
 		if( rententionPolicy.default === true ) {
@@ -104,7 +105,7 @@ class InfluxClient {
 
 		return statement;
 	}
-	
+
 	createRetentionPolicyAsync( databaseName, rententionPolicy ) {
 
 		const statement = this.formatCreateRetentionPolicy( databaseName, rententionPolicy );
@@ -113,17 +114,17 @@ class InfluxClient {
 
 	formatCreateContinuousQuery( databaseName, continuousQuery ) {
 
-		let statement = `CREATE CONTINUOUS QUERY "${ continuousQuery.name }"` 
+		let statement = `CREATE CONTINUOUS QUERY "${ continuousQuery.name }"`
 			+ ` ON "${ databaseName }"`;
 
 		const resample = continuousQuery.resample;
 		if( resample && ( resample.every || resample.for ) ) {
 			statement += ' RESAMPLE ';
 			if( resample.every ) {
-				statement += ` EVERY ${ resample.every }`
+				statement += ` EVERY ${ resample.every }`;
 			}
 			if( resample.for ) {
-				statement += ` FOR ${ resample.for }`
+				statement += ` FOR ${ resample.for }`;
 			}
 		}
 
@@ -132,7 +133,7 @@ class InfluxClient {
 
 		return statement;
 	}
-	
+
 	createContinuousQueryAsync( databaseName, continuousQuery ) {
 
 		const statement = this.formatCreateContinuousQuery( databaseName, continuousQuery );
