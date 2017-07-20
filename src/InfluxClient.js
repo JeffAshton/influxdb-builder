@@ -107,7 +107,7 @@ class InfluxClient {
 	
 	createRetentionPolicyAsync( databaseName, rententionPolicy ) {
 
-		const statement = formatCreateRetentionPolicy( databaseName, rententionPolicy );
+		const statement = this.formatCreateRetentionPolicy( databaseName, rententionPolicy );
 		return this._post( statement );
 	}
 
@@ -135,7 +135,7 @@ class InfluxClient {
 	
 	createContinuousQueryAsync( databaseName, continuousQuery ) {
 
-		const statement = formatCreateContinuousQuery( databaseName, continuousQuery );
+		const statement = this.formatCreateContinuousQuery( databaseName, continuousQuery );
 		return this._post( statement );
 	}
 }
