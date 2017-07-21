@@ -2,7 +2,6 @@
 
 const Promise = require( 'bluebird' );
 
-const InfluxClient = require( './InfluxClient.js' );
 const influxDbChangeApplier = require( './influxDbChangeApplier.js' );
 const influxDbChangePlanner = require( './influxDbChangePlanner.js' );
 const influxDbReader = require( './influxDbReader.js' );
@@ -10,11 +9,21 @@ const influxDbReader = require( './influxDbReader.js' );
 const log = require( './log.js' );
 const ymlDefinitionReader = require( './ymlDefinitionReader.js' );
 
-const influx = new InfluxClient( 'http://localhost:8086' );
-const databaseName = 'buses';
-const apply = true;
+function buildPlan( influx, databaseName, definitionPath ) {
 
-function handlePlan( plan ) {
+	return Promise
+		.all( [
+			ymlDefinitionReader( 'example', { database: databaseName } ),
+			influxDbReader( influx, databaseName )
+		] )
+		.spread( ( definition, database ) => {
+
+			const plan = influxDbChangePlanner( databaseName, database, definition );
+			return plan;
+		} );
+}
+
+function handlePlan( influx, databaseName, plan, apply ) {
 
 	if( !plan.hasChanges ) {
 
@@ -34,20 +43,19 @@ function handlePlan( plan ) {
 		} );
 }
 
-Promise
-	.all( [
-		ymlDefinitionReader( 'example', { database: databaseName } ),
-		influxDbReader( influx, databaseName )
-	] )
-	.spread( ( definition, database ) => {
+module.exports = function( args ) {
 
-		const plan = influxDbChangePlanner( databaseName, database, definition );
-		return handlePlan( plan );
-	} )
-	.then( exitCode => {
-		process.exit( exitCode ); // eslint-disable-line no-process-exit
-	} )
-	.catch( err => {
-		log.error( err );
-		process.exit( -10 ); // eslint-disable-line no-process-exit
-	} );
+	const influx = args.influx;
+	const databaseName = args.databaseName;
+	const definitionPath = args.definitionPath;
+	const apply = args.apply;
+
+	return buildPlan( influx, databaseName, definitionPath )
+		.then( plan => {
+			return handlePlan( influx, databaseName, plan, apply );
+		} )
+		.catch( err => {
+			log.error( err );
+			return -10;
+		} );
+};
