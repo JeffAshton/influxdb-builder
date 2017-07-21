@@ -55,6 +55,6 @@ module.exports = function( argv ) {
 		influx: new InfluxClient( args.influxUrl, args.username, args.password ),
 		databaseName: args.database,
 		definitionPath: args.definition,
-		apply: false
+		apply: args.apply
 	};
 };
