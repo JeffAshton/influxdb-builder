@@ -38,6 +38,25 @@ function expandSeries( series ) {
 	} );
 }
 
+function formatRetentionPolicyStatement( databaseName, retentionPolicy, action ) {
+
+	let statement = `${ action } RETENTION POLICY "${ retentionPolicy.name }"`
+		+ ` ON "${ databaseName }"`
+		+ ` DURATION ${ retentionPolicy.duration }`
+		+ ` REPLICATION ${ retentionPolicy.replication }`;
+
+	const shardDuration = retentionPolicy.shard_duration;
+	if( shardDuration ) {
+		statement += ` SHARD DURATION ${ shardDuration }`;
+	}
+
+	if( retentionPolicy.default === true ) {
+		statement += ' DEFAULT';
+	}
+
+	return statement;
+}
+
 class InfluxClient {
 
 	constructor( url, username, password ) {
@@ -119,34 +138,46 @@ class InfluxClient {
 			} );
 	}
 
-	createDatabaseAsync( databaseName ) {
+	createDatabase( database ) {
 
-		const statement = `CREATE DATABASE "${ databaseName }"`;
-		return this._post( statement );
-	}
+		const retentionPolicy = database.retentionPolicy;
 
-	createRetentionPolicyAsync( databaseName, rententionPolicy ) {
-
-		let statement = `CREATE RETENTION POLICY "${ rententionPolicy.name }"`
-			+ ` ON "${ databaseName }"`
-			+ ` DURATION ${ rententionPolicy.duration }`
-			+ ` REPLICATION ${ rententionPolicy.replication }`;
-
-		const shardDuration = rententionPolicy.shard_duration;
-		if( shardDuration ) {
-			statement += ` SHARD DURATION ${ shardDuration }`;
-		}
-
-		if( rententionPolicy.default === true ) {
-			statement += ' DEFAULT';
-		}
+		const statement = `CREATE DATABASE "${ database.name }"`
+			+ ' WITH'
+			+ ` DURATION ${ retentionPolicy.duration }`
+			+ ` REPLICATION ${ retentionPolicy.replication }`
+			+ ` NAME "${ retentionPolicy.name }"`;
 
 		return this._post( statement );
 	}
 
-	createContinuousQueryAsync( databaseName, continuousQuery ) {
+	createRetentionPolicy( databaseName, retentionPolicy ) {
+
+		const statement = formatRetentionPolicyStatement( databaseName, retentionPolicy, 'CREATE' );
+		return this._post( statement );
+	}
+
+	alterRetentionPolicy( databaseName, retentionPolicy ) {
+
+		const statement = formatRetentionPolicyStatement( databaseName, retentionPolicy, 'ALTER' );
+		return this._post( statement );
+	}
+
+	dropRetentionPolicy( databaseName, retentionPolicyName ) {
+
+		const statement = `DROP RETENTION POLICY "${ retentionPolicyName }" ON "${ databaseName }"`;
+		return this._post( statement );
+	}
+
+	createContinuousQuery( databaseName, continuousQuery ) {
 
 		const statement = continuousQueryFormatter( databaseName, continuousQuery );
+		return this._post( statement );
+	}
+
+	dropContinuousQuery( databaseName, continuousQueryName ) {
+
+		const statement = `DROP CONTINUOUS QUERY "${ continuousQueryName }" ON "${ databaseName }"`;
 		return this._post( statement );
 	}
 }

@@ -29,43 +29,45 @@ function remapRetentionPolicyFields( retentionPolicy ) {
 	} );
 }
 
+function readInfluxDatabase( influx, databaseName ) {
+
+	const continuousQueriesP = influx
+		.showContinuousQueries( databaseName )
+		.then( queries => {
+			return _.keyBy( queries, 'name' );
+		} );
+
+	const retentionPoliciesP = influx
+		.showRetentionPolicies( databaseName )
+		.then( policies => {
+
+			const remappedPolicies = _.map( policies, remapRetentionPolicyFields );
+			return _.keyBy( remappedPolicies, 'name' );
+		} );
+
+	return Promise
+		.props( {
+			continuousQueries: continuousQueriesP,
+			retentionPolicies: retentionPoliciesP
+		} )
+		.then( database => {
+
+			const sorted = sortKeys( database, { deep: true } );
+			return sorted;
+		} );
+}
+
 module.exports = function( influx, databaseName ) {
 
 	return influx
 		.showDatabases()
 		.then( databases => {
 
-			const database = _.find( databases, { name: databaseName } );
-			if( !database ) {
-
-				return {
-					continuousQueries: {},
-					retentionPolicies: {}
-				};
+			const exists = _.find( databases, { name: databaseName } );
+			if( !exists ) {
+				return Promise.resolve( null );
 			}
 
-			const continuousQueriesP = influx
-				.showContinuousQueries( databaseName )
-				.then( queries => {
-					return _.keyBy( queries, 'name' );
-				} );
-
-			const retentionPoliciesP = influx
-				.showRetentionPolicies( databaseName )
-				.then( policies => {
-
-					const remappedPolicies = _.map( policies, remapRetentionPolicyFields );
-					return _.keyBy( remappedPolicies, 'name' );
-				} );
-
-			return Promise.props( {
-				continuousQueries: continuousQueriesP,
-				retentionPolicies: retentionPoliciesP
-			} );
-		} )
-		.then( database => {
-
-			const sorted = sortKeys( database, { deep: true } );
-			return sorted;
+			return readInfluxDatabase( influx, databaseName );
 		} );
 };
