@@ -21,6 +21,62 @@ describe( 'InfluxClient', function() {
 		nock.cleanAll();
 	} );
 
+	describe( 'showDatabases', function() {
+
+		describe( 'when databases exist', function() {
+			it( 'should return databases', function() {
+
+				const req = nock( mockInfluxUrl, nockOptions )
+					.get( '/query' )
+					.query( { q: 'SHOW DATABASES' } )
+					.reply( 200,
+						/* eslint-disable quotes, indent */
+						{
+							"results": [
+								{
+									"statement_id": 0,
+									"series": [
+										{
+											"name": "databases",
+											"columns": [
+												"name"
+											],
+											"values": [
+												[
+													"_internal"
+												],
+												[
+													"telegraf"
+												]
+											]
+										}
+									]
+								}
+							]
+						}
+						/* eslint-enable quotes, indent */
+					);
+
+				return testClient
+					.showDatabases()
+					.then( databases => {
+
+						assert.deepEqual( databases, [
+							{
+								name: '_internal'
+							},
+							{
+								name: 'telegraf',
+							}
+						] );
+
+						req.done();
+					} );
+			} );
+		} );
+
+	} );
+
 	describe( 'showContinuousQueries', function() {
 
 		describe( 'when database does not exist', function() {

@@ -2,6 +2,8 @@
 
 const _ = require( 'lodash' );
 const rp = require( 'request-promise' );
+
+const continuousQueryFormatter = require( './continuousQueryFormatter.js' );
 const log = require( './log.js' );
 
 function getFirstResult( response ) {
@@ -77,6 +79,18 @@ class InfluxClient {
 		};
 	}
 
+	showDatabases() {
+
+		const statement = 'SHOW DATABASES';
+		return this
+			._get( statement )
+			.then( result => {
+
+				const series = result.series[ 0 ];
+				return expandSeries( series );
+			} );
+	}
+
 	showRetentionPolicies( databaseName ) {
 
 		const statement = `SHOW RETENTION POLICIES ON "${ databaseName }"`;
@@ -111,7 +125,7 @@ class InfluxClient {
 		return this._post( statement );
 	}
 
-	formatCreateRetentionPolicy( databaseName, rententionPolicy ) {
+	createRetentionPolicyAsync( databaseName, rententionPolicy ) {
 
 		let statement = `CREATE RETENTION POLICY "${ rententionPolicy.name }"`
 			+ ` ON "${ databaseName }"`
@@ -127,40 +141,12 @@ class InfluxClient {
 			statement += ' DEFAULT';
 		}
 
-		return statement;
-	}
-
-	createRetentionPolicyAsync( databaseName, rententionPolicy ) {
-
-		const statement = this.formatCreateRetentionPolicy( databaseName, rententionPolicy );
 		return this._post( statement );
-	}
-
-	formatCreateContinuousQuery( databaseName, continuousQuery ) {
-
-		let statement = `CREATE CONTINUOUS QUERY "${ continuousQuery.name }"`
-			+ ` ON "${ databaseName }"`;
-
-		const resample = continuousQuery.resample;
-		if( resample && ( resample.every || resample.for ) ) {
-			statement += ' RESAMPLE ';
-			if( resample.every ) {
-				statement += ` EVERY ${ resample.every }`;
-			}
-			if( resample.for ) {
-				statement += ` FOR ${ resample.for }`;
-			}
-		}
-
-		const query = continuousQuery.query.replace( /\s+/g, ' ' );
-		statement += ` BEGIN ${ query } END`;
-
-		return statement;
 	}
 
 	createContinuousQueryAsync( databaseName, continuousQuery ) {
 
-		const statement = this.formatCreateContinuousQuery( databaseName, continuousQuery );
+		const statement = continuousQueryFormatter( databaseName, continuousQuery );
 		return this._post( statement );
 	}
 }
