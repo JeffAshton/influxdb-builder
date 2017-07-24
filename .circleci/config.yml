@@ -12,5 +12,6 @@ jobs:
       - run: npm run ci
 
       - run: sudo npm install -g bunyan
+      - run: wget -qO- --retry-connrefused -T 10 http://localhost:8086/query?q=SHOW+DATABASES
       - run: node bin/influxdb-builder --influxUrl http://localhost:8086 --database test --definition example/resources.yml --apply | bunyan
       - run: node bin/influxdb-builder --influxUrl http://localhost:8086 --database test --definition example/resources.yml | bunyan
