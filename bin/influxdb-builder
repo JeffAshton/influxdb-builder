@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+'use strict';
+
 const argsParser = require( '../src/argsParser.js' );
 const app = require( '../src/app.js' );
 
