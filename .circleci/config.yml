@@ -7,6 +7,6 @@ jobs:
       - image: mongo:3.4.4
     steps:
       - checkout
-      - run: npm-prune
-      - run: npm-update
+      - run: npm prune
+      - run: npm install
       - run: npm run ci
