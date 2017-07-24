@@ -16,6 +16,7 @@
     "influxdb"
   ],
   "author": "Jeff Ashton",
+  "url": "https://github.com/JeffAshton/influxdb-builder",
   "license": "MIT",
   "dependencies": {
     "bluebird": "^3.5.0",
