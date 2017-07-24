@@ -151,6 +151,12 @@ class InfluxClient {
 		return this._post( statement );
 	}
 
+	dropDatabase( databaseName ) {
+
+		const statement = `DROP DATABASE "${ databaseName }"`;
+		return this._post( statement );
+	}
+
 	createRetentionPolicy( databaseName, retentionPolicy ) {
 
 		const statement = formatRetentionPolicyStatement( databaseName, retentionPolicy, 'CREATE' );

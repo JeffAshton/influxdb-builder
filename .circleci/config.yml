@@ -10,4 +10,6 @@ jobs:
       - run: npm prune
       - run: npm install
       - run: npm run ci
-      - run: bin/influxdb-builder --influxUrl http://localhost:8086 --database test --definition example/ --apply
+
+      - run: npm install -g bunyan
+      - run: bin/influxdb-builder --influxUrl http://localhost:8086 --database test --definition example/resources.yml --apply | bunyan
