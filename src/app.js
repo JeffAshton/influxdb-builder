@@ -13,7 +13,7 @@ function buildPlan( influx, databaseName, definitionPath ) {
 
 	return Promise
 		.all( [
-			ymlDefinitionReader( 'example', { database: databaseName } ),
+			ymlDefinitionReader( definitionPath, { database: databaseName } ),
 			influxDbReader( influx, databaseName )
 		] )
 		.spread( ( definition, database ) => {
