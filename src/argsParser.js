@@ -51,8 +51,11 @@ module.exports = function( argv ) {
 
 	const args = yanop.simple( spec, argv );
 
+	const username = args.username || process.env.INFLUXDB_BUILDER_USERNAME;
+	const password = args.username || process.env.INFLUXDB_BUILDER_PASSWORD;
+
 	return {
-		influx: new InfluxClient( args.influxUrl, args.username, args.password ),
+		influx: new InfluxClient( args.influxUrl, username, password ),
 		databaseName: args.database,
 		definitionPath: args.definition,
 		apply: args.apply
