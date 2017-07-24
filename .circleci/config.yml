@@ -4,7 +4,7 @@ jobs:
     working_directory: ~/influxdb-builder
     docker:
       - image: circleci/node:6.11.1
-      - image: mongo:3.4.4
+      - image: influxdb:1.2.4-alpine
     steps:
       - checkout
       - run: npm prune

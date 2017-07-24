@@ -51,8 +51,8 @@ module.exports = function( argv ) {
 
 	const args = yanop.simple( spec, argv );
 
-	const username = args.username || process.env.INFLUXDB_BUILDER_USERNAME;
-	const password = args.username || process.env.INFLUXDB_BUILDER_PASSWORD;
+	const username = args.username || process.env.INFLUXDB_BUILDER_USERNAME; // eslint-disable-line no-process-env
+	const password = args.username || process.env.INFLUXDB_BUILDER_PASSWORD; // eslint-disable-line no-process-env
 
 	return {
 		influx: new InfluxClient( args.influxUrl, username, password ),
