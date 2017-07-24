@@ -1,0 +1,12 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/influxdb-builder
+    docker:
+      - image: circleci/node:6.11.1
+      - image: mongo:3.4.4
+    steps:
+      - checkout
+      - run: npm-prune
+      - run: npm-update
+      - run: npm run ci
