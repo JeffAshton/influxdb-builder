@@ -12,5 +12,5 @@ jobs:
       - run: npm run ci
 
       - run: sudo npm install -g bunyan
-      - run: echo $PWD
       - run: node bin/influxdb-builder --influxUrl http://localhost:8086 --database test --definition example/resources.yml --apply | bunyan
+      - run: node bin/influxdb-builder --influxUrl http://localhost:8086 --database test --definition example/resources.yml | bunyan
